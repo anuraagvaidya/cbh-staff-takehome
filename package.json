@@ -1,10 +1,12 @@
 {
   "name": "cbh-staff-takehome",
   "version": "1.0.0",
+  "type": "module",
   "description": "This is my submission to the CBH Staff take-home assignment.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "tsc && node ./dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/anuraagvaidya/cbh-staff-takehome/issues"
   },
-  "homepage": "https://github.com/anuraagvaidya/cbh-staff-takehome#readme"
+  "homepage": "https://github.com/anuraagvaidya/cbh-staff-takehome#readme",
+  "dependencies": {
+    "fastify": "^4.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  }
 }
