@@ -4,6 +4,9 @@ export class DBClient {
     constructor(){
         this.db = new MockDB();
     }
+    printAllData(){
+        this.db.printAllData();
+    }
     async createTable(tableName: string, columnsDefinition: columnsDefinition[]){
         return this.db.createTable(tableName, columnsDefinition);
     }

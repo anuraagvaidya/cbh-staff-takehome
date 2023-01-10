@@ -1,6 +1,7 @@
 export interface columnsDefinition {
     name: string,
     type: string,
+    optional?: boolean,
 }
 interface ErroredColumn{
     name: string,
@@ -12,17 +13,22 @@ export interface DBCondition{
     value: any,
 }
 export interface ColumnSelection{
-    operation: 'none' | 'sum' | 'average' | 'min' | 'max',
+    operation: 'none' | 'sum' | 'average' | 'min' | 'max' | 'distinct' | 'count',
     column: string,
     alias?: string,
 }
 export class MockDB {
     tables:{
-        columns: columnsDefinition[],
-        data: any
+        [tableName: string]: {
+            columns: columnsDefinition[],
+            data: any
+        }
     }
     constructor(){
-
+        this.tables = {};
+    }
+    printAllData(){
+        console.log(JSON.stringify(this.tables));
     }
     async createTable(tableName: string, columnsDefinition: columnsDefinition[]){
         this.tables[tableName] = {
@@ -33,41 +39,70 @@ export class MockDB {
     private async validateData(tableName: string, data: any){
         let erroredColumns: ErroredColumn[] = [];
         for(let column of this.tables[tableName].columns){
-            if(column.type === 'string'){
-                if(typeof data[column.name] !== 'string'){
+            if(data[column.name] === undefined){
+                if(!column.optional){
                     erroredColumns.push({
                         name: column.name,
-                        error: 'Expected string, got ' + typeof data[column.name],
+                        error: 'missing',
                     });
                 }
             }
-            else if(column.type === 'number'){
-                if(typeof data[column.name] !== 'number'){
-                    erroredColumns.push({
-                        name: column.name,
-                        error: 'Expected number, got ' + typeof data[column.name],
-                    });
+            else {
+                if(column.type === 'string'){
+                    if(typeof data[column.name] !== 'string'){
+                        erroredColumns.push({
+                            name: column.name,
+                            error: 'not a string',
+                        });
+                    }
                 }
-            }
-            else if(column.type === 'boolean'){
-                if(typeof data[column.name] !== 'boolean'){
-                    erroredColumns.push({
-                        name: column.name,
-                        error: 'Expected boolean, got ' + typeof data[column.name],
-                    });
+                else if(column.type === 'number'){
+                    if(typeof data[column.name] !== 'number'){
+                        erroredColumns.push({
+                            name: column.name,
+                            error: 'not a number',
+                        });
+                    }
+                }
+                else if(column.type === 'boolean'){
+                    if(typeof data[column.name] !== 'boolean'){
+                        erroredColumns.push({
+                            name: column.name,
+                            error: 'not a boolean',
+                        });
+                    }
+                }
+                else if(column.type === 'date'){
+                    if(typeof data[column.name] !== 'string'){
+                        erroredColumns.push({
+                            name: column.name,
+                            error: 'not a string',
+                        });
+                    }
+                    else {
+                        let date = new Date(data[column.name]);
+                        if(isNaN(date.getTime())){
+                            erroredColumns.push({
+                                name: column.name,
+                                error: 'not a valid date',
+                            });
+                        }
+                    }
                 }
             }
         }
-        return erroredColumns;
+        return erroredColumns;        
     }
     async insert(tableName: string, data: any){
         let erroredColumns = await this.validateData(tableName, data);
         if(erroredColumns.length > 0){
-            throw new Error('Invalid data: ' + erroredColumns.map(column => column.name + ' ' + column.error).join(', '));
+            const e = new Error('Invalid data: ' + erroredColumns.map(column => column.name + ' ' + column.error).join(', '));
+            e['code'] = 'invalid-data-in-insert';
+            throw e;
         }
         else {
             // making a copy of data since for this mock db, we are sharing the same object between the db and the api
-            let id = this.tables[tableName].data.length;
+            let id = '' + this.tables[tableName].data.length;
             const newData = {id, ...data};
             this.tables[tableName].data.push(newData);
             return {insertedId: id};
@@ -138,6 +173,9 @@ export class MockDB {
             return data.reduce((sum: number, data: any) => sum + Number(data[operation.column]), 0);
         }
         else if(operation.operation === 'average'){
+            if(data.length === 0){
+                return 0;
+            }
             return data.reduce((sum: number, data: any) => sum + Number(data[operation.column]), 0) / data.length;
         }
         else if(operation.operation === 'min'){
@@ -145,6 +183,12 @@ export class MockDB {
         }
         else if(operation.operation === 'max'){
             return data.reduce((max: number, data: any) => Math.max(max, Number(data[operation.column])), -Infinity);
+        }
+        else if(operation.operation === 'distinct'){
+            return [...new Set(data.map((data: any) => data[operation.column]))];
+        }
+        else if(operation.operation === 'count'){
+            return data.length;
         }
     }
     async aggregate(tableName: string, columns: ColumnSelection[], conditions: DBCondition[]){
