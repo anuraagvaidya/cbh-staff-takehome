@@ -24,6 +24,7 @@ export class HTTPServer{
         });
         try{
             await this.server.listen({
+                host: '0.0.0.0',
                 port: this.port,
             });
         }

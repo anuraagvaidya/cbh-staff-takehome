@@ -1,7 +1,8 @@
 # We basically have a single Node.js application in this project
 version: "3.9"
+
 services:
-  web:
+  app:
     build: .
     ports:
       - "3000:3000"

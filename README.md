@@ -5,13 +5,25 @@ This is my submission to the CBH Staff take-home assignment.
 ## Running the code
 When running, the server will be available at `http://localhost:3000`.
 
-### Using Docker
+### With Docker
+**Running the server**
 Run `docker-compose up` in the project root.
+Running tests is also part of the Dockerfile.
+
+**Running the tests**
+Run `docker-compose run --rm app npm run test`
 
 ### Without Docker
-1. Install Node.js 16.13.0 or later
-2. Run `npm install` in the project root
-3. Run `npm run dev` to start the server
+- Install Node.js 16.13.0 or later
+-  Run `npm install` in the project root
+
+
+**Running the server**
+- Run `npm run dev`
+
+
+**Running the tests**
+-  Run `npm run test`
 
 ### Dummy user credentials
 Email: `dummy@clipboardhealth.com` and password: `dummy`.
