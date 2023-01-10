@@ -4,6 +4,7 @@ import { HTTPServer } from "./server.js";
 import { UserController } from "./db/user-controller.js";
 import { FastifyInstance } from "fastify";
 export class SalaryRecordAPI {
+    routesAttached: boolean = false;
     constructor(private server: HTTPServer, private salaryRecordController: SalaryRecordController){
     }
     async attachRoutes(fastify: FastifyInstance){
@@ -13,6 +14,7 @@ export class SalaryRecordAPI {
         this.attachGetSummaryStatisticsForOnContract(fastify);
         this.attachGetSummaryStatisticsForAllDepartments(fastify);
         this.attachGetSummaryStatisticsForAllSubDepartments(fastify);
+        this.routesAttached = true;
     }
     async attachAddNewRecord(fastify: FastifyInstance){
         fastify.route({
@@ -70,18 +72,16 @@ export class SalaryRecordAPI {
     async attachDeleteRecordById(fastify: FastifyInstance){
         fastify.route({
             method: 'DELETE',
-            url: '/api/salary/delete-record-by-id',
+            url: '/api/salary/delete-record-by-id/:id',
             preHandler: fastify.auth([
                 fastify['verifyJWT'],
             ]),
             schema:{
-                body: {
+                params: {
                     type: 'object',
                     properties: {
                         id: {type: 'string'},
-                    },
-                    additionalProperties: false,
-                    required: ['id'],
+                    }
                 },
                 response: {
                     200: {
@@ -100,9 +100,9 @@ export class SalaryRecordAPI {
                 }
             },
             handler: async (request, reply) => {
-                let body = request.body as {id: string};
+                let id = request.params['id'] as string;
                 try{
-                    let result = await this.salaryRecordController.deleteById(body.id);
+                    let result = await this.salaryRecordController.deleteById(id);
                     reply.send({
                         status: 'success',
                         data: result,
@@ -312,8 +312,10 @@ export class SalaryRecordAPI {
 }
 
 export class UserAPI {
+    routesAttached: boolean = false;
     constructor(private server: HTTPServer, private userController: UserController) {
         this.attachLogin();
+        this.routesAttached = true;
     }
     attachLogin(){
         let fastify = this.server.getLibraryObject();
@@ -358,7 +360,7 @@ export class UserAPI {
                         });
                     }
                     else{
-                        reply.send({
+                        reply.status(401).send({
                             status: 'error',
                             errorCode: 'invalid-credentials',
                             errorMessage: 'Invalid credentials',
@@ -367,7 +369,7 @@ export class UserAPI {
                 }
                 catch(err){
                     console.error(err);
-                    reply.send({
+                    reply.status(401).send({
                         status: 'error',
                         errorCode: err.code,
                     });
