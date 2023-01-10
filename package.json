@@ -1,0 +1,19 @@
+{
+  "name": "cbh-staff-takehome",
+  "version": "1.0.0",
+  "description": "This is my submission to the CBH Staff take-home assignment.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anuraagvaidya/cbh-staff-takehome.git"
+  },
+  "author": "Anuraag Vaidya",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/anuraagvaidya/cbh-staff-takehome/issues"
+  },
+  "homepage": "https://github.com/anuraagvaidya/cbh-staff-takehome#readme"
+}
