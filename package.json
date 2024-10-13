@@ -23,7 +23,7 @@
   "homepage": "https://github.com/anuraagvaidya/cbh-staff-takehome#readme",
   "dependencies": {
     "@fastify/auth": "^4.2.0",
-    "fastify": "^4.11.0",
+    "fastify": "^4.28.1",
     "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
